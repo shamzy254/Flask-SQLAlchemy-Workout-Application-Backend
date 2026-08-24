@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 
+from sqlalchemy.orm import validates
+
 from . import db
 
 
@@ -17,6 +19,13 @@ class Workout(db.Model):
         order_by="WorkoutExercise.position",
     )
 
+    @validates("name")
+    def validate_name(self, key, value):
+        value = value.strip() if isinstance(value, str) else value
+        if not value:
+            raise ValueError("Workout name cannot be blank.")
+        return value
+
 
 class Exercise(db.Model):
     __tablename__ = "exercises"
@@ -26,6 +35,13 @@ class Exercise(db.Model):
     description = db.Column(db.Text, nullable=True)
     muscle_group = db.Column(db.String(80), nullable=True)
     workout_uses = db.relationship("WorkoutExercise", back_populates="exercise")
+
+    @validates("name")
+    def validate_name(self, key, value):
+        value = value.strip() if isinstance(value, str) else value
+        if not value:
+            raise ValueError("Exercise name cannot be blank.")
+        return value
 
 
 class WorkoutExercise(db.Model):
@@ -47,3 +63,9 @@ class WorkoutExercise(db.Model):
     position = db.Column(db.Integer, nullable=False, default=1)
     workout = db.relationship("Workout", back_populates="exercises")
     exercise = db.relationship("Exercise", back_populates="workout_uses")
+
+    @validates("sets", "reps", "duration_seconds", "position")
+    def validate_positive_value(self, key, value):
+        if value is not None and value <= 0:
+            raise ValueError(f"{key} must be greater than zero.")
+        return value

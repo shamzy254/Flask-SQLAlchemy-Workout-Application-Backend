@@ -1,7 +1,7 @@
 import pytest
 
 from app import create_app, db
-from app.models import Exercise
+from app.models import Exercise, WorkoutExercise
 
 
 @pytest.fixture()
@@ -47,3 +47,29 @@ def test_missing_exercise_and_delete_workout(client):
     workout = client.post("/api/workouts", json={"name": "Core", "exercises": [{"exercise_id": exercise_id, "duration_seconds": 30}]})
     assert client.delete(f"/api/workouts/{workout.get_json()['id']}").status_code == 204
     assert client.get(f"/api/workouts/{workout.get_json()['id']}").status_code == 404
+
+
+def test_exercise_and_workout_updates_and_referenced_exercise_delete(client):
+    exercise_id = create_exercise(client)
+    workout = client.post(
+        "/api/workouts",
+        json={"name": "Strength", "exercises": [{"exercise_id": exercise_id, "sets": 3, "reps": 5}]},
+    ).get_json()
+
+    updated_exercise = client.patch(f"/api/exercises/{exercise_id}", json={"name": "Barbell Deadlift"})
+    assert updated_exercise.status_code == 200
+    assert updated_exercise.get_json()["name"] == "Barbell Deadlift"
+    updated_workout = client.patch(f"/api/workouts/{workout['id']}", json={"name": "Updated Strength"})
+    assert updated_workout.status_code == 200
+    assert updated_workout.get_json()["name"] == "Updated Strength"
+    assert client.delete(f"/api/exercises/{exercise_id}").status_code == 409
+
+
+def test_model_validators_reject_blank_and_non_positive_values(client):
+    exercise = Exercise(name="Valid")
+    db.session.add(exercise)
+    with pytest.raises(ValueError):
+        Exercise(name="   ")
+    db.session.rollback()
+    with pytest.raises(ValueError):
+        WorkoutExercise(sets=0)

@@ -1,8 +1,9 @@
-from marshmallow import EXCLUDE, Schema, fields, post_load, validate, validates_schema, ValidationError
+from marshmallow import EXCLUDE, Schema, ValidationError, fields, validate, validates_schema
 
 
 positive = validate.Range(min=1)
-name = fields.Str(required=True, validate=validate.Length(min=1, max=120), allow_none=False)
+non_blank_name = validate.And(validate.Length(min=1, max=120), validate.Regexp(r".*\S.*"))
+name = fields.Str(required=True, validate=non_blank_name, allow_none=False)
 
 
 class ExerciseSchema(Schema):
@@ -51,3 +52,12 @@ class WorkoutCreateSchema(Schema):
     name = name
     description = fields.Str(allow_none=True, validate=validate.Length(max=2000))
     exercises = fields.List(fields.Nested(WorkoutExerciseSchema), load_default=list, validate=validate.Length(max=100))
+
+
+class WorkoutUpdateSchema(Schema):
+    class Meta:
+        unknown = EXCLUDE
+
+    name = fields.Str(validate=non_blank_name, allow_none=False)
+    description = fields.Str(allow_none=True, validate=validate.Length(max=2000))
+    exercises = fields.List(fields.Nested(WorkoutExerciseSchema), validate=validate.Length(max=100))

@@ -37,9 +37,12 @@ The API is available under `/api`. To use another database, set `DATABASE_URL` b
 | GET | `/api/exercises` | Lists reusable exercises, ordered by name. |
 | POST | `/api/exercises` | Creates an exercise. Names must be unique and 1-120 characters. |
 | GET | `/api/exercises/<id>` | Returns one exercise or `404`. |
+| PATCH | `/api/exercises/<id>` | Updates one or more exercise fields. |
+| DELETE | `/api/exercises/<id>` | Deletes an unused exercise; returns `409` when it is referenced by a workout. |
 | GET | `/api/workouts` | Lists workouts and their prescribed exercises. |
 | POST | `/api/workouts` | Creates a workout, optionally with exercise prescriptions. |
 | GET | `/api/workouts/<id>` | Returns one workout with its exercises or `404`. |
+| PATCH | `/api/workouts/<id>` | Updates workout fields; supplying `exercises` replaces its prescriptions. |
 | DELETE | `/api/workouts/<id>` | Deletes a workout and its associated prescriptions. |
 
 When creating a workout, `exercises` is an array of objects. Each object requires an existing `exercise_id` and at least one positive value among `sets`, `reps`, and `duration_seconds`. An exercise can be reused across workouts but only once within the same workout.
