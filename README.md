@@ -2,6 +2,8 @@
 
 A Flask, SQLAlchemy, and Marshmallow backend for personal trainers to manage reusable exercises and workouts. Trainers can define an exercise once, reuse it across workouts, and attach set, rep, or duration prescriptions to each workout entry.
 
+The API supports exercise and workout CRUD operations, nested workout serialization, validation, database constraints, and SQLite by default.
+
 ## Installation
 
 Python 3.8 or newer and Pipenv are recommended.
@@ -13,7 +15,18 @@ pipenv install --dev
 pipenv shell
 ```
 
-The application creates its configured database tables when the app starts. Seed the example exercises and workout with:
+The `Pipfile` defines Python 3.8 and these dependencies:
+
+| Dependency | Version |
+| --- | --- |
+| Flask | 3.0.3 |
+| Flask-SQLAlchemy | 3.1.1 |
+| Flask-Marshmallow | 1.2.1 |
+| Marshmallow | 3.22.0 |
+| Marshmallow-SQLAlchemy | 1.1.1 |
+| Pytest | 8.3.5 (development) |
+
+The application currently creates its configured database tables automatically when it starts with `db.create_all()`. Flask-Migrate is not configured in the application, so there is no `flask db upgrade` step at this time. Seed the example exercises and workout with:
 
 ```bash
 pipenv run python seed.py
@@ -65,7 +78,7 @@ Example request:
 Run the test suite with:
 
 ```bash
-pipenv run pytest
+pipenv run python -m pytest -q
 ```
 
-The tests cover exercise reuse, validation, uniqueness, missing references, workout deletion, and relationship serialization.
+The test file is [`tests/test_api.py`](tests/test_api.py). It covers exercise reuse, validation, uniqueness, missing references, workout deletion, updates, model validation, and relationship serialization. Tests use an in-memory SQLite database so they do not modify the development database.
