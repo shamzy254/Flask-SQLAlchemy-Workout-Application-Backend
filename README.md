@@ -21,12 +21,29 @@ The `Pipfile` defines Python 3.8 and these dependencies:
 | --- | --- |
 | Flask | 3.0.3 |
 | Flask-SQLAlchemy | 3.1.1 |
+| Flask-Migrate | 3.1.0 |
 | Flask-Marshmallow | 1.2.1 |
 | Marshmallow | 3.22.0 |
 | Marshmallow-SQLAlchemy | 1.1.1 |
+| importlib-resources | 5.10.0 |
 | Pytest | 8.3.5 (development) |
+| ipdb | 0.13.9 (development) |
+| setuptools | 57.5.0 (development) |
 
-The application currently creates its configured database tables automatically when it starts with `db.create_all()`. Flask-Migrate is not configured in the application, so there is no `flask db upgrade` step at this time. Seed the example exercises and workout with:
+Apply the database migration after installing dependencies:
+
+```bash
+pipenv run flask --app run db upgrade
+```
+
+The initial migration is stored in `migrations/versions/`. Generate and apply a new migration after model changes with:
+
+```bash
+pipenv run flask --app run db migrate -m "Describe the schema change"
+pipenv run flask --app run db upgrade
+```
+
+Seed the example exercises and workout with:
 
 ```bash
 pipenv run python seed.py
